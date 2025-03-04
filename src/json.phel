@@ -25,22 +25,22 @@
   (cond
     (php/is_iterable x) (encode-value-iterable x)
     (symbol? x) (name x)
-    (keyword? x) (name x)
-    (float? x) (str x)
+    (keyword? x) (name x)  # TODO should use str to keep keyword recognizable from strings (?)
+    (float? x) (str x)     #      see clojure for reference
     true x))
 
 (defn encode
   "Returns the JSON representation of a value."
   [value & [{:flags flags :depth depth}]]
-  (let [flags (or flags 0)
+  (let [flags (or flags 0)  ## TODO remove params
         depth (or depth 512)]
-    (when (php/is_resource value) (throw (php/new JsonException "Value can be any type except a resource.")))
-    (when-not (int? flags) (throw (php/new JsonException "Flags must be an integer.")))
-    (when-not (int? depth) (throw (php/new JsonException "Depth must be an integer.")))
-    (when-not (> depth 0) (throw (php/new JsonException "Depth must be greater than zero.")))
-    (php/json_encode (encode-value value) flags depth)))
+    (when (php/is_resource value) (throw (php/new \InvalidArgumentException "Value can be any type except a resource.")))
+    (when-not (int? flags) (throw (php/new \InvalidArgumentException "Flags must be an integer.")))
+    (when-not (int? depth) (throw (php/new \InvalidArgumentException "Depth must be an integer.")))
+    (when-not (> depth 0) (throw (php/new \InvalidArgumentException "Depth must be greater than zero.")))
+    (php/:: Bencode (encode (encode-value value)))))
 
-(defn decode-value
+(defn decode-value  # TODO rename
   "Convert a json data structure to a 'phel compatible' value."
   [x]
   (cond
@@ -60,4 +60,11 @@
     (when-not (int? flags) (throw (php/new JsonException "Flags must be an integer.")))
     (when-not (int? depth) (throw (php/new JsonException "Depth must be an integer.")))
     (when-not (> depth 0) (throw (php/new JsonException "Depth must be greater than zero.")))
-    (decode-value (php/json_decode json true depth flags))))
+    (php/:: Bencode (decode (decode-value json)))))
+
+(comment
+  (encode [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
+  (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee")
+  ## TODO (out): <PHP-Array [123, 345, asfd, Printer cannot print this type: ArrayObject]>
+  ##             does phel\json behave like this also?
+  )
