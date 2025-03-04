@@ -2,6 +2,7 @@
   (:use Arokettu\Bencode\Bencode :as Bencode)
   (:use Arokettu\Bencode\Exceptions\InvalidArgumentException) # TODO
   (:use \JsonException)
+  (:require phel\json :as json)
   )
 
 (defn valid-key?
@@ -67,4 +68,13 @@
   (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee")
   ## TODO (out): <PHP-Array [123, 345, asfd, Printer cannot print this type: ArrayObject]>
   ##             does phel\json behave like this also?
+
+  (json/encode [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
+  (json/decode "[123,345,\"asfd\",{\"foo\":[\"asdf\",123,\"FOO\"]}]")
+  ## (out): [123 345 asfd {:foo [asdf 123 FOO]}]
+
+  ## hash-map key string becomes keyword
+  (-> (json/decode "[123,345,\"asfd\",{\"foo\":[\"asdf\",123,\"FOO\"]}]")
+      peek keys first type)  # => :keyword
+
   )
