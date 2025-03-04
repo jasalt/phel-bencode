@@ -1,4 +1,4 @@
-# Phel-bencode
+# Phel-bencode (WIP)
 
 Phel library for converting [Phel](https://phel-lang.org/) datastructures to and from bencode using [arokettu/bencode](https://github.com/arokettu/bencode) based on [mabasic/phel-json](https://github.com/mabasic/phel-json).
 
