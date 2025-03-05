@@ -1,4 +1,4 @@
-(ns mabasic\json\json
+(ns jasalt\bencode
   (:use Arokettu\Bencode\Bencode :as Bencode)
   (:use Arokettu\Bencode\Exceptions\InvalidArgumentException) # TODO
   (:use InvalidArgumentException)
@@ -60,8 +60,11 @@
                                  (php/:: \Arokettu\Bencode\Bencode\Collection ARRAY)))] # dictType
     (php->phel php-data)))
 
+## TODO streams support (?)
+## https://sandfox.dev/php/bencode/decoding.html#working-with-streams
 
 (comment
+
   ## Basic usage
   (encode [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
   (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee")

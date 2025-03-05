@@ -1,5 +1,5 @@
-(ns mabasic\json\tests\decode\value
-  (:require mabasic\json\json)
+(ns jasalt\bencode\tests\decode\value
+  (:require jasalt\bencode)
   (:require phel\test :refer [deftest is]))
 
 (deftest test-sample-value
@@ -16,7 +16,7 @@
                  :postalCode "394221"}
        :phoneNumbers [{:type "home"
                        :number "7383627627"}]}
-      (json/decode sample-data)))))
+      (bencode/decode sample-data)))))
 
 (deftest test-sample-value-2
   (let [sample-data (php/file_get_contents (str __DIR__ "/sample-value-2.json"))]
@@ -46,4 +46,4 @@
        :topic "Some topic"
        :vat_number "12345678901"
        :zip_code "10000"}
-      (json/decode sample-data)))))
+      (bencode/decode sample-data)))))

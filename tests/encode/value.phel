@@ -1,64 +1,64 @@
-(ns mabasic\json\tests\encode\value
-  (:require mabasic\json\json)
+(ns jasalt\bencode\tests\encode\value
+  (:require jasalt\bencode)
   (:require phel\test :refer [deftest is]))
 
 (deftest test-nil
-  (is (= "null" (json/encode nil))))
+  (is (= "null" (bencode/encode nil))))
 
 (deftest test-true
-  (is (= "true" (json/encode true))))
+  (is (= "true" (bencode/encode true))))
 
 (deftest test-false
-  (is (= "false" (json/encode false))))
+  (is (= "false" (bencode/encode false))))
 
 (deftest test-integer
-  (is (= "1" (json/encode 1))))
+  (is (= "1" (bencode/encode 1))))
 
 (deftest test-float
-  (is (= "\"3.14\"" (json/encode 3.14))))
+  (is (= "\"3.14\"" (bencode/encode 3.14))))
 
 (deftest test-string
-  (is (= "\"string\"" (json/encode "string"))))
+  (is (= "\"string\"" (bencode/encode "string"))))
 
 (deftest test-keyword
-  (is (= "\"keyword\"" (json/encode :keyword))))
+  (is (= "\"keyword\"" (bencode/encode :keyword))))
 
 (deftest test-symbol
-  (is (= "\"symbol\"" (json/encode 'symbol))))
+  (is (= "\"symbol\"" (bencode/encode 'symbol))))
 
 (deftest test-list
   (is (=
        "[1,2,3]"
-       (json/encode (list 1 2 3))))
+       (bencode/encode (list 1 2 3))))
   (is (=
        "[1,2,[1,2]]"
-       (json/encode (list 1 2 (list 1 2)))))
+       (bencode/encode (list 1 2 (list 1 2)))))
   (is (=
        "[1,2,\"string\"]"
-       (json/encode (list 1 2 "string"))))
+       (bencode/encode (list 1 2 "string"))))
   (is (=
        "[1,2,[1,2,3]]"
-       (json/encode (list 1 2 (set 1 2 3)))))
+       (bencode/encode (list 1 2 (set 1 2 3)))))
   (is (=
        "[1,2,[1,2,[1,2]]]"
-       (json/encode (list 1 2 (set 1 2 (set 1 2))))))
+       (bencode/encode (list 1 2 (set 1 2 (set 1 2))))))
   (is (=
        "[1,2,{\"year\":2020,\"planet\":\"Earth\"}]"
-       (json/encode (list 1 2 {:year 2020
+       (bencode/encode (list 1 2 {:year 2020
                                "planet" "Earth"}))))
   (is (=
        "[1,2,{\"year\":2020,\"planet\":\"Earth\",\"list\":[\"multi\",\"ple\"]}]"
-       (json/encode (list 1 2 {:year 2020
+       (bencode/encode (list 1 2 {:year 2020
                                "planet" "Earth"
                                "list" (list "multi" "ple")})))))
 
 (deftest test-vector
-  (is (= "[1,2,3]" (json/encode [1 2 3])))
-  (is (= "[1,2,[1,2]]" (json/encode [1 2 [1 2]]))))
+  (is (= "[1,2,3]" (bencode/encode [1 2 3])))
+  (is (= "[1,2,[1,2]]" (bencode/encode [1 2 [1 2]]))))
 
 (deftest test-set
-  (is (= "[1,2,3]" (json/encode (set 1 2 3))))
-  (is (= "[1,2,[1,2]]" (json/encode (set 1 2 (set 1 2))))))
+  (is (= "[1,2,3]" (bencode/encode (set 1 2 3))))
+  (is (= "[1,2,[1,2]]" (bencode/encode (set 1 2 (set 1 2))))))
 
 (defstruct book [title pages year])
 
@@ -66,36 +66,36 @@
   (is
    (=
     "{\"first_name\":\"Mario\",\"last_name\":\"Basic\"}"
-    (json/encode {"first_name" "Mario"
+    (bencode/encode {"first_name" "Mario"
                   "last_name" "Basic"})))
   (is
    (=
     "{\"first_name\":\"Mario\",\"last_name\":\"Basic\",\"set\":[1,2]}"
-    (json/encode {"first_name" "Mario"
+    (bencode/encode {"first_name" "Mario"
                   "last_name" "Basic"
                   "set" (set 1 2)})))
   (is
    (=
     "{\"first_name\":\"Mario\",\"last_name\":\"Basic\",\"set\":[1,2,[3,4]]}"
-    (json/encode {"first_name" "Mario"
+    (bencode/encode {"first_name" "Mario"
                   "last_name" "Basic"
                   "set" (set 1 2 (set 3 4))})))
   (is
    (=
     "{\"first_name\":\"Mario\",\"last_name\":\"Basic\",\"set\":[1,2,[\"three\",4]]}"
-    (json/encode {"first_name" "Mario"
+    (bencode/encode {"first_name" "Mario"
                   "last_name" "Basic"
                   "set" (set 1 2 (set 'three 4))})))
   (is
    (=
     "{\"first_name\":[\"Super\",\"mario\"],\"last_name\":\"Basic\"}"
-    (json/encode {"first_name" ["Super"
+    (bencode/encode {"first_name" ["Super"
                                 :mario]
                   "last_name" "Basic"})))
   (is
    (=
     "{\"first_name\":[\"Super\",\"mario\"],\"last_name\":\"Basic\",\"3.14\":\"Value of PI.\"}"
-    (json/encode {"first_name" ["Super"
+    (bencode/encode {"first_name" ["Super"
                                 :mario]
                   "last_name" "Basic"
                   3.14 "Value of PI."})))
@@ -103,7 +103,7 @@
     (is
      (=
       "{\"first_name\":\"Mario\",\"last_name\":\"Basic\",\"authored\":{\"title\":\"Dictionary\",\"pages\":100,\"year\":2020}}"
-      (json/encode {"first_name" "Mario"
+      (bencode/encode {"first_name" "Mario"
                     "last_name" "Basic"
                     :authored dictionary})))))
 
@@ -114,4 +114,4 @@
     (is
      (=
       "{\"first_name\":\"Mario\",\"last_name\":\"Basic\",\"age\":30}"
-      (json/encode me)))))
+      (bencode/encode me)))))

@@ -1,53 +1,53 @@
-(ns mabasic\json\tests\encode\keys
-  (:require mabasic\json\json)
+(ns jasalt\bencode\tests\encode\keys
+  (:require jasalt\bencode)
   (:require phel\test :refer [deftest is])
   (:use \Exception))
 
 (deftest valid-keys
   (is
-   (= "{\"string\":\"String\"}" (json/encode {"string" "String"}))
+   (= "{\"string\":\"String\"}" (bencode/encode {"string" "String"}))
    "It tests if string is a valid key.")
   (is
-   (= "{\"1\":\"One\"}" (json/encode {1 "One"}))
+   (= "{\"1\":\"One\"}" (bencode/encode {1 "One"}))
    "It tests if integer is a valid key.")
   (is
-   (= "{\"3.14\":\"PI\"}" (json/encode {3.14 "PI"}))
+   (= "{\"3.14\":\"PI\"}" (bencode/encode {3.14 "PI"}))
    "It tests if float is a valid key.")
   (is
-   (= "{\"keyword\":\"Keyword\"}" (json/encode {:keyword "Keyword"}))
+   (= "{\"keyword\":\"Keyword\"}" (bencode/encode {:keyword "Keyword"}))
    "It tests if keyword is a valid key.")
   (is
-   (= "{\"symbol\":\"Symbol\"}" (json/encode {'symbol "Symbol"}))
+   (= "{\"symbol\":\"Symbol\"}" (bencode/encode {'symbol "Symbol"}))
    "It tests if symbol is a valid key."))
 
 (deftest invalid-keys
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {(set 1 2 3) "Set"}))
+    (bencode/encode {(set 1 2 3) "Set"}))
    "It tests if set is a valid key.")
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {(list 1 2 3) "List"}))
+    (bencode/encode {(list 1 2 3) "List"}))
    "It tests if list is a valid key.")
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {[1 2 3] "Vector"}))
+    (bencode/encode {[1 2 3] "Vector"}))
    "It tests if vector is a valid key.")
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {{:hello "World!"} "Hash map"}))
+    (bencode/encode {{:hello "World!"} "Hash map"}))
    "It tests if hash-map is a valid key.")
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {(php/new \stdClass) "stdClass"}))
+    (bencode/encode {(php/new \stdClass) "stdClass"}))
    "It tests if stdClass is a valid key.")
   (is
    (thrown-with-msg?
     Exception "Key can only be an integer, float, symbol, keyword or a string."
-    (json/encode {(php/new \DateTime) "DateTime"}))
+    (bencode/encode {(php/new \DateTime) "DateTime"}))
    "It tests if DateTime is a valid key."))
