@@ -2,7 +2,6 @@
   (:use Arokettu\Bencode\Bencode :as Bencode)
   (:use Arokettu\Bencode\Exceptions\InvalidArgumentException) # TODO
   (:use \JsonException)
-  (:require phel\json :as json)
   )
 
 (defn valid-key?
@@ -12,25 +11,25 @@
 
 (declare encode-value [x])
 
-(defn- encode-value-iterable [x]
+(defn- phel-iterable->php [x]
   (let [arr (php/array)]
     (foreach [k v x]
       (when-not (valid-key? k)
         (throw (php/new JsonException "Key can only be an integer, float, symbol, keyword or a string.")))
-      (php/aset arr (encode-value k) (encode-value v)))
+      (php/aset arr (phel->php k) (phel->php v)))
     arr))
 
-(defn encode-value
-  "Convert a Phel data type to a 'json compatible' value."
+(defn phel->php
+  "Convert a Phel data type to a 'bencode compatible' value."
   [x]
   (cond
-    (php/is_iterable x) (encode-value-iterable x)
+    (php/is_iterable x) (phel-iterable->php x)
     (symbol? x) (name x)
     (keyword? x) (name x)  # TODO should use str to keep keyword recognizable from strings (?)
     (float? x) (str x)     #      see clojure for reference
     true x))
 
-(defn encode
+(defn encode-bc
   "Returns the JSON representation of a value."
   [value & [{:flags flags :depth depth}]]
   (let [flags (or flags 0)  ## TODO remove params
@@ -39,20 +38,20 @@
     (when-not (int? flags) (throw (php/new \InvalidArgumentException "Flags must be an integer.")))
     (when-not (int? depth) (throw (php/new \InvalidArgumentException "Depth must be an integer.")))
     (when-not (> depth 0) (throw (php/new \InvalidArgumentException "Depth must be greater than zero.")))
-    (php/:: Bencode (encode (encode-value value)))))
+    (php/:: Bencode (encode (phel->php value)))))
 
-(defn decode-value  # TODO rename
-  "Convert a json data structure to a 'phel compatible' value."
+(defn php->phel
+  "Convert a php data structure to a 'phel compatible' value."
   [x]
   (cond
-    (indexed? x) (for [v :in x] (decode-value v))
+    (indexed? x) (for [v :in x] (php->phel v))
     (php-array? x) (let [hashmap (transient {})]
                      (foreach [k v x]
-                       (put hashmap (keyword k) (decode-value v)))
+                       (put hashmap (keyword k) (php->phel v)))
                      (persistent hashmap))
     true x))
 
-(defn decode
+(defn decode-bc
   "Decodes a JSON string."
   [json & [{:flags flags :depth depth}]]
   (let [flags (or flags 0)
@@ -61,15 +60,41 @@
     (when-not (int? flags) (throw (php/new JsonException "Flags must be an integer.")))
     (when-not (int? depth) (throw (php/new JsonException "Depth must be an integer.")))
     (when-not (> depth 0) (throw (php/new JsonException "Depth must be greater than zero.")))
-    (php/:: Bencode (decode (decode-value json)))))
+    ## Call decode keeping returned format as array, otherwise ArrayObjects are returned
+    ## https://github.com/arokettu/bencode/blob/7bd5447c34846476822c01cb62c0765f94a89e8c/docs/decoding.rst#lists-and-dictionaries
+    (let [php-data (php/:: Bencode
+                       (decode json
+                               (php-indexed-array) # opts
+                               (php/:: \Arokettu\Bencode\Bencode\Collection ARRAY) # listType
+                               (php/:: \Arokettu\Bencode\Bencode\Collection ARRAY))) # dictType
+          phel-data (php->phel php-data)]
+      phel-data)))
+
 
 (comment
-  (encode [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
-  (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee")
-  ## TODO (out): <PHP-Array [123, 345, asfd, Printer cannot print this type: ArrayObject]>
-  ##             does phel\json behave like this also?
+  (encode-bc [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
+  (decode-bc "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee")
 
+
+  (php/json_decode "[123,345,\"asfd\",{\"foo\":[\"asdf\",123,\"FOO\"]}]" true 512 0)
+  # => <PHP-Array [123, 345, asfd, <PHP-Array [foo:<PHP-Array [asdf, 123, FOO]>]>]>
+
+  (php/:: Bencode (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee"))
+  # => <PHP-Array [123, 345, asfd, Printer cannot print this type: ArrayObject]>
+  ## Library returns ArrayObjects
+
+  (php/:: Bencode (decode "li123ei345e4:asfdd3:fool4:asdfi123e3:FOOeee"
+                          (php-indexed-array)
+                          (php/:: \Arokettu\Bencode\Bencode\Collection ARRAY)
+                          (php/:: \Arokettu\Bencode\Bencode\Collection ARRAY)))
+  # => <PHP-Array [123, 345, asfd, <PHP-Array [foo:<PHP-Array [asdf, 123, FOO]>]>]>
+
+  ## Compare phel\json
+
+  (require phel\json :as json)
   (json/encode [123 345 "asfd" {:foo (set :asdf 123 "FOO")}])
+
+
   (json/decode "[123,345,\"asfd\",{\"foo\":[\"asdf\",123,\"FOO\"]}]")
   ## (out): [123 345 asfd {:foo [asdf 123 FOO]}]
 
