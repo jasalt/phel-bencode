@@ -1,13 +1,13 @@
 {
-    "name": "mabasic/phel-json",
-    "description": "Library for converting Phel datastructures to and from JSON.",
+    "name": "jasalt/phel-bencode",
+    "description": "Library for converting Phel datastructures to and from Bencode.",
     "license": "MIT",
-    "keywords": ["phel", "php", "json"],
+    "keywords": ["phel", "php", "bencode"],
     "authors": [
         {
-            "name": "Mario Bašić",
-            "email": "mario@laravelista.hr",
-            "homepage": "https://mariobasic.com"
+            "name": "Jarkko Saltiola",
+            "email": "jarkko@saltiolacode.fi",
+            "homepage": "https://gitlab.com/jasalt/"
         }
     ],
     "require": {
